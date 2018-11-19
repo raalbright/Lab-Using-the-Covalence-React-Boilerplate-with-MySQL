@@ -1,43 +1,43 @@
 import mysql from 'mysql';
 
-let pool = mysql.createPool({
+let pool = mysql.createPool( {
     connectionLimit: 10,
     host: 'localhost',
-    user: 'exampleUser',
+    user: 'blogapp',
     password: 'password',
-    database: 'InClassExample'
-});
+    database: 'blog'
+} );
 
-async function executeQuery(sql, args = []) {
+async function executeQuery ( sql, args = [] ) {
     let connection = await getConnection();
-    return sendQueryToDB(connection, sql, args);
+    return sendQueryToDB( connection, sql, args );
 }
 
-function callProcedure(procedureName, args = []) {
-    let placeholders = generatePlaceholders(args);
-    let callString = `CALL ${procedureName}(${placeholders});`; // CALL GetChirps();, or CALL InsertChirp(?,?,?);
-    return executeQuery(callString, args);
+function callProcedure ( procedureName, args = [] ) {
+    let placeholders = generatePlaceholders( args );
+    let callString = `CALL ${ procedureName }(${ placeholders });`; // CALL GetChirps();, or CALL InsertChirp(?,?,?);
+    return executeQuery( callString, args );
 }
 
-async function rows(procedureName, args = []) {
-    let resultsets = await callProcedure(procedureName, args);
-    return resultsets[0];
+async function rows ( procedureName, args = [] ) {
+    let resultsets = await callProcedure( procedureName, args );
+    return resultsets[ 0 ];
 }
 
-async function row(procedureName, args = []) {
-    let resultsets = await callProcedure(procedureName, args);
-    return resultsets[0][0];
+async function row ( procedureName, args = [] ) {
+    let resultsets = await callProcedure( procedureName, args );
+    return resultsets[ 0 ][ 0 ];
 }
 
-async function empty(procedureName, args = []) {
-    await callProcedure(procedureName, args);
+async function empty ( procedureName, args = [] ) {
+    await callProcedure( procedureName, args );
 }
 
-function generatePlaceholders(args = []) {
+function generatePlaceholders ( args = [] ) {
     let placeholders = '';
-    if (args.length > 0) {
-        for (let i = 0; i < args.length; i++) {
-            if (i === args.length - 1) { // if we are on the last argument in the array
+    if ( args.length > 0 ) {
+        for ( let i = 0; i < args.length; i++ ) {
+            if ( i === args.length - 1 ) { // if we are on the last argument in the array
                 placeholders += '?';
             } else {
                 placeholders += '?,';
@@ -47,29 +47,29 @@ function generatePlaceholders(args = []) {
     return placeholders;
 }
 
-function getConnection() {
-    return new Promise((resolve, reject) => {
-        pool.getConnection((err, connection) => {
-            if (err) {
-                reject(err);
+function getConnection () {
+    return new Promise( ( resolve, reject ) => {
+        pool.getConnection( ( err, connection ) => {
+            if ( err ) {
+                reject( err );
             } else {
-                resolve(connection);
+                resolve( connection );
             }
-        });
-    });
+        } );
+    } );
 }
 
-function sendQueryToDB(connection, sql, args = []) {
-    return new Promise((resolve, reject) => {
-        connection.query(sql, args, (err, result) => {
+function sendQueryToDB ( connection, sql, args = [] ) {
+    return new Promise( ( resolve, reject ) => {
+        connection.query( sql, args, ( err, result ) => {
             connection.release();
-            if (err) {
-                reject(err);
+            if ( err ) {
+                reject( err );
             } else {
-                resolve(result);
+                resolve( result );
             }
-        });
-    });
+        } );
+    } );
 }
 
 export { row, rows, empty, executeQuery, generatePlaceholders };
